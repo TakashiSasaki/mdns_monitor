@@ -100,8 +100,9 @@ if __name__ == "__main__":
         "_raop._tcp.local.", "_afpovertcp._tcp.local.", "_nfs._tcp.local.", "_daap._tcp.local.",
         "_dacp._tcp.local.", "_hue._tcp.local.", "_hap._tcp.local.", 
         "_googlecast._tcp.local.",  # Google Home and Chromecast
-        "_amazon._tcp.local.",      # Amazon Echo
-        "_fuego._tcp.local."        # FireTV
+        "_amazonecho-remote._tcp.local.",  # Amazon Echo
+        "_amzn-wplay._tcp.local.",  # Amazon Echo wireless playback
+        "_fuego._tcp.local."  # FireTV
     ]
     monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
