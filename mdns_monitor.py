@@ -94,7 +94,15 @@ class MDNSCmd(cmd.Cmd):
         self.monitor.create_browsers()
 
 if __name__ == "__main__":
-    service_types = ["_http._tcp.local.", "_https._tcp.local.", "_ftp._tcp.local."]
+    service_types = [
+        "_http._tcp.local.", "_https._tcp.local.", "_ftp._tcp.local.", "_ssh._tcp.local.",
+        "_smb._tcp.local.", "_printer._tcp.local.", "_ipp._tcp.local.", "_airplay._tcp.local.",
+        "_raop._tcp.local.", "_afpovertcp._tcp.local.", "_nfs._tcp.local.", "_daap._tcp.local.",
+        "_dacp._tcp.local.", "_hue._tcp.local.", "_hap._tcp.local.", 
+        "_googlecast._tcp.local.",  # Google Home and Chromecast
+        "_amazon._tcp.local.",      # Amazon Echo
+        "_fuego._tcp.local."        # FireTV
+    ]
     monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
     try:
