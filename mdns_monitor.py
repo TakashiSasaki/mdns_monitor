@@ -22,8 +22,15 @@ class MDNSMonitor:
 
     def create_browsers(self):
         """
-        Create new ServiceBrowser instances for each service type.
+        Cancel existing ServiceBrowser instances and create new ones for each service type.
         """
+        # Cancel existing browsers
+        for browser in self.browsers:
+            browser.cancel()
+        
+        self.browsers = []
+
+        # Create new browsers
         for service_type in self.service_types:
             browser = ServiceBrowser(self.zeroconf, service_type, handlers=[self.on_service_state_change])
             self.browsers.append(browser)
@@ -69,6 +76,8 @@ class MDNSMonitor:
         """
         Close the Zeroconf instance and clean up.
         """
+        for browser in self.browsers:
+            browser.cancel()
         self.zeroconf.close()
 
 class MDNSCmd(cmd.Cmd):
