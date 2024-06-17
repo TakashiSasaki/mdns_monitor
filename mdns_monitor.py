@@ -9,7 +9,6 @@ discovered services and force sending mDNS queries.
 import socket
 import sys
 from datetime import datetime
-from threading import Event
 from zeroconf import Zeroconf, ServiceBrowser, ServiceStateChange, ServiceInfo
 import cmd
 
@@ -17,7 +16,6 @@ class MDNSMonitor:
     def __init__(self):
         self.zeroconf = Zeroconf()
         self.services = {}
-        self.stop_event = Event()
         self.create_browser()
 
     def create_browser(self):
@@ -67,7 +65,6 @@ class MDNSMonitor:
         """
         Close the Zeroconf instance and clean up.
         """
-        self.stop_event.set()
         self.zeroconf.close()
 
 class MDNSCmd(cmd.Cmd):
