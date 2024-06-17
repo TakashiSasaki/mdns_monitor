@@ -57,22 +57,6 @@ class MDNSMonitor:
             print(f" - {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port}")
         print("")
 
-    def send_mdns_query(self):
-        """
-        Periodically send an mDNS query.
-        """
-        while not self.stop_event.wait(60):  # Send query every 60 seconds
-            print(f"{datetime.now()} - Sending mDNS query")
-            self.browser = ServiceBrowser(self.zeroconf, "_http._tcp.local.", handlers=[self.on_service_state_change])
-
-    def run(self):
-        """
-        Run the mDNS monitor by starting the cmd loop and handling service state changes.
-        """
-        query_thread = Thread(target=self.send_mdns_query)
-        query_thread.start()
-        return query_thread
-
     def close(self):
         """
         Close the Zeroconf instance and clean up.
@@ -91,6 +75,10 @@ class MDNSCmd(cmd.Cmd):
     def do_exit(self, line):
         """Exit the monitor."""
         print("Exiting mDNS monitor...")
+        return True
+
+    def do_EOF(self, line):
+        """Exit the monitor."""
         return True
 
     def emptyline(self):
@@ -118,11 +106,9 @@ if __name__ == "__main__":
     monitor = MDNSMonitor()
     cmd_interface = MDNSCmd(monitor)
     try:
-        query_thread = monitor.run()
         cmd_interface.cmdloop()
     except KeyboardInterrupt:
         print("\nMonitor interrupted by user")
     finally:
         monitor.close()
-        query_thread.join()
         print("mDNS monitor stopped")
