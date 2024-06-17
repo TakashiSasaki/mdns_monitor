@@ -9,7 +9,7 @@ discovered services and force sending mDNS queries.
 import socket
 import sys
 from datetime import datetime
-from threading import Thread, Event
+from threading import Event
 from zeroconf import Zeroconf, ServiceBrowser, ServiceStateChange, ServiceInfo
 import cmd
 
@@ -18,6 +18,12 @@ class MDNSMonitor:
         self.zeroconf = Zeroconf()
         self.services = {}
         self.stop_event = Event()
+        self.create_browser()
+
+    def create_browser(self):
+        """
+        Create a new ServiceBrowser instance.
+        """
         self.browser = ServiceBrowser(self.zeroconf, "_http._tcp.local.", handlers=[self.on_service_state_change])
 
     def on_service_state_change(self, zeroconf, service_type, name, state_change):
@@ -77,30 +83,14 @@ class MDNSCmd(cmd.Cmd):
         print("Exiting mDNS monitor...")
         return True
 
-    def do_EOF(self, line):
-        """Exit the monitor."""
-        return True
-
     def emptyline(self):
         """When an empty line is entered, display the list of current services."""
         self.monitor.display_services()
 
-    def do_query(self, line):
-        """Force sending an mDNS query."""
-        print(f"{datetime.now()} - Sending mDNS query")
-        self.monitor.browser = ServiceBrowser(self.monitor.zeroconf, "_http._tcp.local.", handlers=[self.monitor.on_service_state_change])
-
-    def completenames(self, text, line, begidx, endidx):
-        """
-        Enable command completion.
-        """
-        return [name[len('do_'):] for name in self.get_names() if name.startswith('do_' + text)]
-
-    def completedefault(self, text, line, begidx, endidx):
-        """
-        Provide default completion behavior.
-        """
-        return [name[len('do_'):] for name in self.get_names() if name.startswith('do_')]
+    def do_renew(self, line):
+        """Renew the ServiceBrowser instance."""
+        print(f"{datetime.now()} - Renewing ServiceBrowser")
+        self.monitor.create_browser()
 
 if __name__ == "__main__":
     monitor = MDNSMonitor()
