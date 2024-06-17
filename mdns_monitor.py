@@ -2,7 +2,8 @@
 mdns_monitor.py
 
 This script acts as a monitor for mDNS service discovery. It discovers services on
-the local network and periodically displays the current list of discovered services.
+the local network and provides an interactive shell to display the current list of
+discovered services and force sending mDNS queries.
 """
 
 import socket
@@ -12,12 +13,8 @@ from threading import Thread, Event
 from zeroconf import Zeroconf, ServiceBrowser, ServiceStateChange, ServiceInfo
 import cmd
 
-class MDNSMonitor(cmd.Cmd):
-    intro = 'Welcome to the mDNS monitor. Type help or ? to list commands.\n'
-    prompt = '(mdns_monitor) '
-
+class MDNSMonitor:
     def __init__(self):
-        super().__init__()
         self.zeroconf = Zeroconf()
         self.services = {}
         self.stop_event = Event()
@@ -51,14 +48,6 @@ class MDNSMonitor(cmd.Cmd):
             del self.services[name]
             print(f"{datetime.now()} - Service {name} removed")
 
-    def do_EOF(self, line):
-        """Exit the monitor."""
-        return True
-
-    def emptyline(self):
-        """When an empty line is entered, display the list of current services."""
-        self.display_services()
-
     def display_services(self):
         """
         Display the list of current services.
@@ -67,11 +56,6 @@ class MDNSMonitor(cmd.Cmd):
         for name, info in self.services.items():
             print(f" - {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port}")
         print("")
-
-    def do_query(self, line):
-        """Force sending an mDNS query."""
-        print(f"{datetime.now()} - Sending mDNS query")
-        self.browser = ServiceBrowser(self.zeroconf, "_http._tcp.local.", handlers=[self.on_service_state_change])
 
     def send_mdns_query(self):
         """
@@ -87,9 +71,7 @@ class MDNSMonitor(cmd.Cmd):
         """
         query_thread = Thread(target=self.send_mdns_query)
         query_thread.start()
-        self.cmdloop()
-        self.stop_event.set()
-        query_thread.join()
+        return query_thread
 
     def close(self):
         """
@@ -98,12 +80,49 @@ class MDNSMonitor(cmd.Cmd):
         self.stop_event.set()
         self.zeroconf.close()
 
+class MDNSCmd(cmd.Cmd):
+    intro = 'Welcome to the mDNS monitor. Type help or ? to list commands.\n'
+    prompt = '(mdns_monitor) '
+
+    def __init__(self, monitor):
+        super().__init__()
+        self.monitor = monitor
+
+    def do_exit(self, line):
+        """Exit the monitor."""
+        print("Exiting mDNS monitor...")
+        return True
+
+    def emptyline(self):
+        """When an empty line is entered, display the list of current services."""
+        self.monitor.display_services()
+
+    def do_query(self, line):
+        """Force sending an mDNS query."""
+        print(f"{datetime.now()} - Sending mDNS query")
+        self.monitor.browser = ServiceBrowser(self.monitor.zeroconf, "_http._tcp.local.", handlers=[self.monitor.on_service_state_change])
+
+    def completenames(self, text, line, begidx, endidx):
+        """
+        Enable command completion.
+        """
+        return [name[len('do_'):] for name in self.get_names() if name.startswith('do_' + text)]
+
+    def completedefault(self, text, line, begidx, endidx):
+        """
+        Provide default completion behavior.
+        """
+        return [name[len('do_'):] for name in self.get_names() if name.startswith('do_')]
+
 if __name__ == "__main__":
     monitor = MDNSMonitor()
+    cmd_interface = MDNSCmd(monitor)
     try:
-        monitor.run()
+        query_thread = monitor.run()
+        cmd_interface.cmdloop()
     except KeyboardInterrupt:
         print("\nMonitor interrupted by user")
     finally:
         monitor.close()
+        query_thread.join()
         print("mDNS monitor stopped")
