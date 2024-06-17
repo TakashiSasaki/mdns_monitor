@@ -103,7 +103,10 @@ if __name__ == "__main__":
         "_amazonecho-remote._tcp.local.",  # Amazon Echo
         "_amzn-wplay._tcp.local.",  # Amazon Echo wireless playback
         "_fuego._tcp.local.",  # FireTV
-        "_axis-video._tcp.local."  # Network Cameras
+        "_axis-video._tcp.local.",  # Network Cameras
+        "_ntp._udp.local.", "_sip._udp.local.", "_h323._udp.local.", "_rfb._udp.local.",
+        "_rtsp._udp.local.", "_sftp-ssh._udp.local.", "_tftp._udp.local.", "_snmp._udp.local.",
+        "_syslog._udp.local.", "_dns-sd._udp.local."
     ]
     monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
@@ -114,4 +117,3 @@ if __name__ == "__main__":
     finally:
         monitor.close()
         print("mDNS monitor stopped")
-
