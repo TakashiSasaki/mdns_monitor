@@ -109,13 +109,19 @@ if __name__ == "__main__":
         "_raop._tcp.local.", "_afpovertcp._tcp.local.", "_nfs._tcp.local.", "_daap._tcp.local.",
         "_dacp._tcp.local.", "_hue._tcp.local.", "_hap._tcp.local.", 
         "_googlecast._tcp.local.",  # Google Home and Chromecast
+        "_googlezone._tcp.local.",  # Google Home and Chromecast
         "_amazonecho-remote._tcp.local.",  # Amazon Echo
+        "_amazon._tcp.local.",  # Amazon
+        "_amzn-alexa._tcp.local.",  # Amazon Alexa
         "_amzn-wplay._tcp.local.",  # Amazon Echo wireless playback
         "_fuego._tcp.local.",  # FireTV
         "_axis-video._tcp.local.",  # Network Cameras
         "_ntp._udp.local.", "_sip._udp.local.", "_h323._udp.local.", "_rfb._udp.local.",
         "_rtsp._udp.local.", "_sftp-ssh._udp.local.", "_tftp._udp.local.", "_snmp._udp.local.",
-        "_syslog._udp.local.", "_dns-sd._udp.local."
+        "_syslog._udp.local.", "_dns-sd._udp.local.",
+        "_pdl-datastream._tcp.local.",
+        "_qdiscover._tcp.local.",
+        "_workstation._tcp.local."
     ]
     monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
