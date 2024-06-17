@@ -13,16 +13,20 @@ from zeroconf import Zeroconf, ServiceBrowser, ServiceStateChange, ServiceInfo
 import cmd
 
 class MDNSMonitor:
-    def __init__(self):
+    def __init__(self, service_types):
         self.zeroconf = Zeroconf()
         self.services = {}
-        self.create_browser()
+        self.service_types = service_types
+        self.browsers = []
+        self.create_browsers()
 
-    def create_browser(self):
+    def create_browsers(self):
         """
-        Create a new ServiceBrowser instance.
+        Create new ServiceBrowser instances for each service type.
         """
-        self.browser = ServiceBrowser(self.zeroconf, "_http._tcp.local.", handlers=[self.on_service_state_change])
+        for service_type in self.service_types:
+            browser = ServiceBrowser(self.zeroconf, service_type, handlers=[self.on_service_state_change])
+            self.browsers.append(browser)
 
     def on_service_state_change(self, zeroconf, service_type, name, state_change):
         """
@@ -30,10 +34,10 @@ class MDNSMonitor:
         """
         if state_change is ServiceStateChange.Added:
             self.add_service(zeroconf, service_type, name)
-            print(f"{datetime.now()} - Service {name} has been added by ServiceBrowser")
+            print(f"{datetime.now()} - Service {name} ({service_type}) has been added by ServiceBrowser")
         elif state_change is ServiceStateChange.Removed:
             self.remove_service(zeroconf, service_type, name)
-            print(f"{datetime.now()} - Service {name} has been removed by ServiceBrowser")
+            print(f"{datetime.now()} - Service {name} ({service_type}) has been removed by ServiceBrowser")
 
     def add_service(self, zeroconf, service_type, name):
         """
@@ -42,7 +46,7 @@ class MDNSMonitor:
         info = zeroconf.get_service_info(service_type, name)
         if info:
             self.services[name] = info
-            print(f"{datetime.now()} - Service {name} added")
+            print(f"{datetime.now()} - Service {name} ({service_type}) added")
 
     def remove_service(self, zeroconf, service_type, name):
         """
@@ -50,7 +54,7 @@ class MDNSMonitor:
         """
         if name in self.services:
             del self.services[name]
-            print(f"{datetime.now()} - Service {name} removed")
+            print(f"{datetime.now()} - Service {name} ({service_type}) removed")
 
     def display_services(self):
         """
@@ -58,7 +62,7 @@ class MDNSMonitor:
         """
         print(f"\n{datetime.now()} - Current known mDNS Services:")
         for name, info in self.services.items():
-            print(f" - {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port}")
+            print(f" - {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port} ({info.type})")
         print("")
 
     def close(self):
@@ -85,12 +89,13 @@ class MDNSCmd(cmd.Cmd):
         self.monitor.display_services()
 
     def do_renew(self, line):
-        """Renew the ServiceBrowser instance."""
-        print(f"{datetime.now()} - Renewing ServiceBrowser")
-        self.monitor.create_browser()
+        """Renew the ServiceBrowser instances."""
+        print(f"{datetime.now()} - Renewing ServiceBrowser instances")
+        self.monitor.create_browsers()
 
 if __name__ == "__main__":
-    monitor = MDNSMonitor()
+    service_types = ["_http._tcp.local.", "_https._tcp.local.", "_ftp._tcp.local."]
+    monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
     try:
         cmd_interface.cmdloop()
