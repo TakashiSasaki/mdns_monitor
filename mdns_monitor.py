@@ -102,7 +102,8 @@ if __name__ == "__main__":
         "_googlecast._tcp.local.",  # Google Home and Chromecast
         "_amazonecho-remote._tcp.local.",  # Amazon Echo
         "_amzn-wplay._tcp.local.",  # Amazon Echo wireless playback
-        "_fuego._tcp.local."  # FireTV
+        "_fuego._tcp.local.",  # FireTV
+        "_axis-video._tcp.local."  # Network Cameras
     ]
     monitor = MDNSMonitor(service_types)
     cmd_interface = MDNSCmd(monitor)
@@ -113,3 +114,4 @@ if __name__ == "__main__":
     finally:
         monitor.close()
         print("mDNS monitor stopped")
+
