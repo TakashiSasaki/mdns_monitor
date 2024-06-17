@@ -56,9 +56,9 @@ class MDNSMonitor:
 
     def display_services(self):
         """
-        Display the list of current services.
+        Display the list of current known services.
         """
-        print(f"\n{datetime.now()} - Current mDNS Services:")
+        print(f"\n{datetime.now()} - Current known mDNS Services:")
         for name, info in self.services.items():
             print(f" - {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port}")
         print("")
@@ -84,7 +84,7 @@ class MDNSCmd(cmd.Cmd):
         return True
 
     def emptyline(self):
-        """When an empty line is entered, display the list of current services."""
+        """When an empty line is entered, display the list of current known services."""
         self.monitor.display_services()
 
     def do_renew(self, line):
